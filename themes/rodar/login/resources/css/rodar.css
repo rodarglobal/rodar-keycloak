@@ -1,0 +1,448 @@
+/*
+ * Tema de login RODAR (Keycloak keycloak.v2 + PatternFly 5).
+ * Tokens iguais aos de rodar-web (src/index.css) e rodar-mobile (tailwind.config.js, docs/DESIGN.md):
+ * superfícies quase pretas com tom verde, verde da marca para ações, lima só no símbolo.
+ * Celular (< 640px) segue o app: tela cheia, campos e botão de 56px, raio 16.
+ * Tela larga segue o painel web: card ink-900 centralizado, raio 12, campos de raio 8.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/Inter-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('../fonts/SpaceGrotesk-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Kumbh Sans';
+  src: url('../fonts/KumbhSans-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root.rodar {
+  --color-brand-50: #e8f2ea;
+  --color-brand-300: #7fd19c;
+  --color-brand-400: #4fae74;
+  --color-brand-500: #3d7a52;
+  --color-brand-600: #285c3b;
+  --color-ink-950: #090b09;
+  --color-ink-900: #111511;
+  --color-ink-800: #1c231d;
+  --color-ink-700: #354037;
+  --color-ink-300: #aeb8b0;
+  --color-ink-50: #f6f8f6;
+  --color-alert-500: #f04438;
+  --color-wait-500: #f5a524;
+  --color-ok-500: #17b26a;
+  --color-rodar-mark: #a2f200;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-brand: 'Kumbh Sans', 'Space Grotesk', sans-serif;
+
+  --rodar-field-h: 56px;
+  --rodar-field-radius: 16px;
+  --rodar-field-bg: var(--color-ink-900);
+
+  /* PatternFly: fontes e cores globais */
+  --pf-v5-global--FontFamily--text: var(--font-sans);
+  --pf-v5-global--FontFamily--heading: var(--font-display);
+  --pf-v5-global--FontFamily--sans-serif: var(--font-sans);
+  --pf-v5-global--BackgroundColor--100: var(--color-ink-950);
+  --pf-v5-global--BackgroundColor--200: var(--color-ink-900);
+  --pf-v5-global--Color--100: var(--color-ink-50);
+  --pf-v5-global--Color--200: var(--color-ink-300);
+  --pf-v5-global--BorderColor--100: var(--color-ink-700);
+  --pf-v5-global--primary-color--100: var(--color-brand-500);
+  --pf-v5-global--primary-color--200: var(--color-brand-600);
+  --pf-v5-global--link--Color: var(--color-brand-300);
+  --pf-v5-global--link--Color--hover: var(--color-brand-50);
+  --pf-v5-global--danger-color--100: var(--color-alert-500);
+  --pf-v5-global--danger-color--200: var(--color-alert-500);
+
+  color-scheme: dark;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.rodar body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-sans);
+  color: var(--color-ink-50);
+  background: var(--color-ink-950);
+}
+
+.rodar ::selection { background: var(--color-brand-600); color: var(--color-ink-50); }
+.rodar :focus-visible { outline: 2px solid var(--color-brand-300); outline-offset: 3px; }
+
+/* ---------- Estrutura ---------- */
+
+.rodar .pf-v5-c-login {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+}
+
+.rodar .pf-v5-c-login__container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 30rem;
+  padding: 24px 20px calc(20px + env(safe-area-inset-bottom));
+  grid-template-columns: none;
+}
+
+.rodar .pf-v5-c-login__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+
+.rodar .pf-v5-c-login__main-header {
+  display: block;
+  padding: 0;
+  margin: 36px 0 28px;
+  border-top: 0;
+}
+
+.rodar .pf-v5-c-login__main-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.rodar #kc-form,
+.rodar #kc-form-wrapper,
+.rodar #kc-form-login {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.rodar .pf-v5-c-login__main-footer { padding: 0; }
+.rodar .pf-v5-c-login__main-footer-band { padding: 16px 0 0; border: 0; background: none; text-align: center; color: var(--color-ink-300); }
+
+/* ---------- Assinatura e idioma ---------- */
+
+.rodar .rodar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rodar .rodar-signature {
+  --rodar-logo-size: 44px;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--rodar-logo-size) * .26);
+  min-width: 0;
+}
+
+.rodar .rodar-mark {
+  flex-shrink: 0;
+  width: calc(var(--rodar-logo-size) * 775 / 799);
+  height: var(--rodar-logo-size);
+  color: var(--color-rodar-mark);
+}
+
+.rodar .rodar-signature-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.rodar .rodar-word {
+  font-family: var(--font-brand);
+  font-weight: 750;
+  font-size: calc(var(--rodar-logo-size) * .62);
+  letter-spacing: .01em;
+  line-height: 1;
+  color: var(--color-ink-50);
+}
+
+.rodar .rodar-tagline { font-size: 13px; line-height: 1.3; color: var(--color-ink-300); }
+
+.rodar .rodar-lang {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--color-ink-700);
+  border-radius: 999px;
+  background: var(--color-ink-900);
+}
+
+.rodar .rodar-lang a {
+  min-width: 36px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-ink-300);
+}
+
+.rodar .rodar-lang a:hover { color: var(--color-ink-50); }
+.rodar .rodar-lang a.is-active { background: var(--color-brand-500); color: var(--color-ink-50); }
+
+/* ---------- Título ---------- */
+
+.rodar .pf-v5-c-title,
+.rodar #kc-page-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  color: var(--color-ink-50);
+}
+
+.rodar .rodar-subtitle {
+  margin: 10px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-ink-300);
+}
+
+/* ---------- Formulário ---------- */
+
+.rodar .pf-v5-c-form { gap: 20px; }
+
+.rodar .pf-v5-c-form__group-label { padding-bottom: 8px; }
+
+.rodar .pf-v5-c-form__label,
+.rodar .pf-v5-c-form__label-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-ink-50);
+}
+
+.rodar .pf-v5-c-form__label-required { color: var(--color-alert-500); }
+
+/* Campo: caixa única com borda; o PatternFly desenha bordas em ::before/::after, que desligamos. */
+.rodar .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: var(--rodar-field-bg);
+  min-height: var(--rodar-field-h);
+  border: 1px solid var(--color-ink-700);
+  border-radius: var(--rodar-field-radius);
+  background: var(--rodar-field-bg);
+  color: var(--color-ink-50);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.rodar .pf-v5-c-form-control::before,
+.rodar .pf-v5-c-form-control::after { border: 0 !important; }
+
+.rodar .pf-v5-c-form-control > input,
+.rodar .pf-v5-c-form-control > select {
+  height: calc(var(--rodar-field-h) - 2px);
+  padding: 0 16px;
+  font-family: var(--font-sans);
+  font-size: 16px; /* 16px evita zoom automático no iOS */
+  color: var(--color-ink-50);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.rodar .pf-v5-c-form-control > input::placeholder { color: var(--color-ink-300); }
+
+.rodar .pf-v5-c-form-control:focus-within {
+  border-color: var(--color-brand-400);
+  box-shadow: 0 0 0 3px rgba(61, 122, 82, .35);
+}
+
+.rodar .pf-v5-c-form-control.pf-m-error { border-color: var(--color-alert-500); }
+.rodar .pf-v5-c-form-control.pf-m-error:focus-within { box-shadow: 0 0 0 3px rgba(240, 68, 56, .25); }
+.rodar .pf-v5-c-form-control__icon.pf-m-status { color: var(--color-alert-500); }
+
+.rodar .pf-v5-c-form-control.pf-m-readonly { background: var(--color-ink-800); }
+
+/* Autocompletar do navegador sem fundo claro */
+.rodar input:-webkit-autofill,
+.rodar input:-webkit-autofill:hover,
+.rodar input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-ink-50);
+  -webkit-box-shadow: 0 0 0 1000px var(--rodar-field-bg) inset;
+  caret-color: var(--color-ink-50);
+  transition: background-color 9999s;
+}
+
+/* Senha: campo + botão de mostrar formam uma caixa só */
+.rodar .pf-v5-c-input-group {
+  border: 1px solid var(--color-ink-700);
+  border-radius: var(--rodar-field-radius);
+  background: var(--rodar-field-bg);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.rodar .pf-v5-c-input-group:focus-within {
+  border-color: var(--color-brand-400);
+  box-shadow: 0 0 0 3px rgba(61, 122, 82, .35);
+}
+.rodar .pf-v5-c-input-group:has(.pf-m-error) { border-color: var(--color-alert-500); }
+.rodar .pf-v5-c-input-group .pf-v5-c-form-control,
+.rodar .pf-v5-c-input-group .pf-v5-c-form-control:focus-within {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.rodar .pf-v5-c-input-group__item { border: 0; }
+.rodar .pf-v5-c-button.pf-m-control {
+  min-width: 52px;
+  height: calc(var(--rodar-field-h) - 2px);
+  border-radius: 0 var(--rodar-field-radius) var(--rodar-field-radius) 0;
+  background: transparent;
+  color: var(--color-ink-300);
+}
+.rodar .pf-v5-c-button.pf-m-control::after { border: 0; }
+.rodar .pf-v5-c-button.pf-m-control:hover { color: var(--color-ink-50); }
+
+/* Mensagens de erro do campo */
+.rodar .pf-v5-c-form__helper-text,
+.rodar .pf-v5-c-helper-text__item-text.pf-m-error,
+.rodar .kc-feedback-text { font-size: 14px; }
+.rodar .pf-v5-c-helper-text__item-text.pf-m-error { color: var(--color-alert-500); }
+
+/* "Manter conectado" */
+.rodar .pf-v5-c-check { align-items: center; gap: 10px; margin-top: 4px; }
+.rodar .pf-v5-c-check__input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-brand-500);
+}
+.rodar .pf-v5-c-check__label { font-size: 15px; color: var(--color-ink-300); }
+
+/* Links (esqueci a senha, voltar) */
+.rodar a { color: var(--color-brand-300); }
+.rodar a:hover { color: var(--color-brand-50); }
+
+/* ---------- Botões ---------- */
+
+.rodar #kc-form-login > .pf-v5-c-form__group:has(> .pf-v5-c-form__actions),
+.rodar #kc-form-buttons { margin-top: auto; padding-top: 24px; }
+.rodar .pf-v5-c-form__actions { margin: 0; padding: 0; }
+.rodar .pf-v5-c-form__actions > * { margin: 0; }
+
+.rodar .pf-v5-c-button.pf-m-primary,
+.rodar .pf-v5-c-button.pf-m-secondary {
+  width: 100%;
+  min-height: 56px;
+  border-radius: var(--rodar-field-radius);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: .005em;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.rodar .pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--color-brand-500);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--color-brand-600);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--color-brand-600);
+  --pf-v5-c-button--m-primary--active--BackgroundColor: var(--color-brand-600);
+  --pf-v5-c-button--m-primary--Color: var(--color-ink-50);
+  --pf-v5-c-button--m-primary--hover--Color: var(--color-ink-50);
+  background: var(--color-brand-500);
+  color: var(--color-ink-50);
+}
+.rodar .pf-v5-c-button.pf-m-primary:hover,
+.rodar .pf-v5-c-button.pf-m-primary:focus-visible { background: var(--color-brand-600); }
+.rodar .pf-v5-c-button.pf-m-primary:disabled { background: var(--color-brand-600); color: var(--color-brand-50); opacity: .7; cursor: wait; }
+
+.rodar .pf-v5-c-button.pf-m-secondary {
+  --pf-v5-c-button--m-secondary--Color: var(--color-ink-50);
+  --pf-v5-c-button--m-secondary--hover--Color: var(--color-ink-50);
+  background: transparent;
+  color: var(--color-ink-50);
+}
+.rodar .pf-v5-c-button.pf-m-secondary::after { border: 1px solid var(--color-ink-700); border-radius: var(--rodar-field-radius); }
+.rodar .pf-v5-c-button.pf-m-secondary:hover { background: var(--color-ink-800); }
+
+.rodar .pf-v5-c-button.pf-m-link { color: var(--color-brand-300); }
+
+/* ---------- Alertas (erro geral, sessão expirada, sucesso) ---------- */
+
+.rodar .pf-v5-c-alert {
+  --pf-v5-c-alert--BackgroundColor: var(--color-ink-900);
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-ink-700);
+  border-radius: 12px;
+  background: var(--color-ink-900);
+  box-shadow: none;
+}
+.rodar .pf-v5-c-alert::before { border: 0; }
+.rodar .pf-v5-c-alert.pf-m-danger { border-color: rgba(240, 68, 56, .5); background: rgba(240, 68, 56, .1); }
+.rodar .pf-v5-c-alert.pf-m-warning { border-color: rgba(245, 165, 36, .5); background: rgba(245, 165, 36, .1); }
+.rodar .pf-v5-c-alert.pf-m-success { border-color: rgba(23, 178, 106, .5); background: rgba(23, 178, 106, .1); }
+.rodar .pf-v5-c-alert.pf-m-info { border-color: var(--color-ink-700); }
+.rodar .pf-v5-c-alert__title { font-size: 14px; font-weight: 500; color: var(--color-ink-50); }
+.rodar .pf-v5-c-alert.pf-m-danger .pf-v5-c-alert__icon { color: var(--color-alert-500); }
+.rodar .pf-v5-c-alert.pf-m-warning .pf-v5-c-alert__icon { color: var(--color-wait-500); }
+.rodar .pf-v5-c-alert.pf-m-success .pf-v5-c-alert__icon { color: var(--color-ok-500); }
+
+/* ---------- Rodapé ---------- */
+
+.rodar .rodar-footnote {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-ink-300);
+}
+
+/* ---------- Tela larga: card do painel web ---------- */
+
+@media (min-width: 640px) {
+  .rodar body {
+    background: radial-gradient(ellipse at top, var(--color-ink-800), var(--color-ink-950) 65%) fixed;
+  }
+
+  :root.rodar {
+    --rodar-field-h: 48px;
+    --rodar-field-radius: 8px;
+    --rodar-field-bg: var(--color-ink-950);
+  }
+
+  .rodar .pf-v5-c-login { align-items: center; padding: 40px 20px; }
+
+  .rodar .pf-v5-c-login__container {
+    max-width: 28rem;
+    padding: 40px;
+    border: 1px solid var(--color-ink-700);
+    border-radius: 12px;
+    background: var(--color-ink-900);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .35);
+  }
+
+  .rodar .pf-v5-c-login__main-header { margin: 32px 0 24px; }
+  .rodar .pf-v5-c-title, .rodar #kc-page-title { font-size: 28px; }
+  .rodar .rodar-subtitle { font-size: 14px; }
+  .rodar .pf-v5-c-button.pf-m-primary, .rodar .pf-v5-c-button.pf-m-secondary { min-height: 48px; font-size: 15px; }
+  .rodar #kc-form-login > .pf-v5-c-form__group:has(> .pf-v5-c-form__actions), .rodar #kc-form-buttons { margin-top: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rodar * { transition: none !important; }
+}
