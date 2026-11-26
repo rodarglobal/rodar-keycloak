@@ -226,6 +226,8 @@
 /* ---------- Formulário ---------- */
 
 .rodar .pf-v5-c-form { gap: 20px; }
+/* E-mail já informado (login em duas etapas) acima do formulário de senha */
+.rodar .pf-v5-c-login__main-body > .pf-v5-c-form { margin-bottom: 20px; }
 
 .rodar .pf-v5-c-form__group-label { padding-bottom: 8px; }
 

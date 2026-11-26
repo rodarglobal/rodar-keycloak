@@ -1,0 +1,299 @@
+{
+  "realm": "rodar",
+  "enabled": true,
+  "displayName": "RODAR",
+  "loginTheme": "rodar",
+  "organizationsEnabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "registrationEmailAsUsername": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": true,
+  "bruteForceProtected": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "pt-BR",
+    "en"
+  ],
+  "defaultLocale": "pt-BR",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 604800,
+  "ssoSessionMaxLifespan": 2592000,
+  "offlineSessionIdleTimeout": 2592000,
+  "roles": {
+    "realm": [
+      {
+        "name": "driver",
+        "description": "Motorista: app rodar-mobile"
+      },
+      {
+        "name": "cco-operator",
+        "description": "Operador da central (CCO): painel rodar-web"
+      },
+      {
+        "name": "cco-admin",
+        "description": "Gestor da central: operador + cadastros e usuários da empresa"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "rodar-mobile",
+      "name": "RODAR · app do motorista",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "redirectUris": [
+        "avisai://*",
+        "rodar://*",
+        "exp://*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "avisai://*##rodar://*##exp://*"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email",
+        "basic",
+        "organization"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "aud rodar-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "rodar-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "rodar-web",
+      "name": "RODAR · painel do CCO",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email",
+        "basic",
+        "organization"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "aud rodar-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "rodar-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "rodar-api",
+      "name": "RODAR · API (audiência)",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect"
+    }
+  ],
+  "users": [
+    {
+      "username": "carlos@rotasul.test",
+      "email": "carlos@rotasul.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Carlos",
+      "lastName": "Andrade",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "driver"
+      ]
+    },
+    {
+      "username": "marina@rotasul.test",
+      "email": "marina@rotasul.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Marina",
+      "lastName": "Souza",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "driver"
+      ]
+    },
+    {
+      "username": "joao@rotasul.test",
+      "email": "joao@rotasul.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "João",
+      "lastName": "Pereira",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "driver"
+      ]
+    },
+    {
+      "username": "cco@rotasul.test",
+      "email": "cco@rotasul.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Operador",
+      "lastName": "CCO",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "cco-operator"
+      ]
+    },
+    {
+      "username": "gestor@rotasul.test",
+      "email": "gestor@rotasul.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Gestora",
+      "lastName": "CCO",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "cco-operator",
+        "cco-admin"
+      ]
+    },
+    {
+      "username": "ana@translog.test",
+      "email": "ana@translog.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Ana",
+      "lastName": "Lima",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "avisai-demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-rodar",
+        "driver"
+      ]
+    }
+  ]
+}
