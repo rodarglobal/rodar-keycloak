@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  keycloak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Arquivos válidos (JSON, compose e scripts)
+        run: |
+          python3 -m json.tool realm/rodar-realm.json > /dev/null
+          cp .env.example .env
+          docker compose config -q
+          bash -n scripts/configure.sh scripts/smoke.sh
+
+      - name: Sobe Keycloak + Postgres e aplica temas e empresas
+        run: |
+          docker compose up -d
+          for i in $(seq 1 90); do
+            status=$(docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' rodar-keycloak-kc-setup-1 2>/dev/null || true)
+            [[ "$status" == exited* ]] && break
+            sleep 4
+          done
+          docker logs rodar-keycloak-kc-setup-1
+          [[ "$status" == "exited 0" ]]
+
+      - name: Smoke test (login do app com PKCE, claims do token)
+        run: |
+          ./scripts/smoke.sh carlos@rotasul.test | tee carlos.txt
+          grep -q "organization: \['rota-sul'\]" carlos.txt
+          grep -q "trip_id/driver_id no token: False" carlos.txt
+          ./scripts/smoke.sh joao@rotasul.test | tee joao.txt
+          grep -q "translog-demo" joao.txt && grep -q "rota-sul" joao.txt
+          ./scripts/smoke.sh gestor@rotasul.test | tee gestor.txt
+          grep -q "cco-admin" gestor.txt
+
+      - name: Tema RODAR no login
+        run: |
+          curl -fsS "http://localhost:8180/realms/rodar/protocol/openid-connect/auth?client_id=rodar-mobile&redirect_uri=avisai%3A%2F%2Foauthredirect&response_type=code&scope=openid&code_challenge=abcabcabcabcabcabcabcabcabcabcabcabcabcabca&code_challenge_method=S256" \
+            | grep -q 'rodar-signature'
+
+      - name: Logs do Keycloak (se falhar)
+        if: failure()
+        run: docker compose logs keycloak | tail -200
