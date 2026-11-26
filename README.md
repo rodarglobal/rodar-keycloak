@@ -65,7 +65,7 @@ flowchart TD
   B -- empresa com SSO --> S --> T
   B -- senha --> P --> T
   T --> K --> R
-  C -. organizations.conf ou console .-> B
+  C -.->|organizations.conf ou console| B
 
   classDef cco fill:#a2f200,stroke:#090b09,color:#090b09
   classDef ai fill:#17b26a,stroke:#090b09,color:#f6f8f6
