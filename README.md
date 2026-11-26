@@ -1,41 +1,73 @@
 # rodar-keycloak
 
-Keycloak (OIDC/SSO) do RODAR: realm `avisai`, clientes e ambiente local em Docker.
+Keycloak (OIDC/SSO) do RODAR: realm `rodar`, clients por produto, empresas como Organizations, temas da marca e
+ambiente local em Docker.
+
+- **Guia da estrutura** (o que existe, token, integração, operações): [docs/ESTRUTURA.md](docs/ESTRUTURA.md)
+- **Decisão e alternativas** (por que realm único, clients e Organizations): [docs/adr/0001](docs/adr/0001-estrutura-realm-clients-organizations.md)
 
 ## Subir
 
 ```bash
 cp .env.example .env
-docker compose up -d
-./scripts/smoke.sh          # fluxo Authorization Code + PKCE do app, só com curl
+docker compose up -d        # Keycloak + Postgres; o kc-setup aplica temas e empresas e sai
+./scripts/smoke.sh          # login Authorization Code + PKCE do app, só com curl (aceita: usuário senha)
 ```
 
 - Admin: http://localhost:8180/admin (credenciais do `.env`)
-- Issuer: `http://<host>:8180/realms/avisai`. Em `start-dev` o hostname é dinâmico: o issuer segue o host
-  pelo qual o Keycloak é acessado. Para o celular, use o IP da máquina na rede local (ex.: `http://192.168.0.10:8180/realms/avisai`).
+- Issuer: `http://<host>:8180/realms/rodar`. Em `start-dev` o hostname é dinâmico: o issuer segue o host pelo qual
+  o Keycloak é acessado. No celular, use o IP da máquina na rede local ou `localhost` com `adb reverse tcp:8180 tcp:8180`.
 
-O realm é importado de `realm/avisai-realm.json` só na **primeira** subida (banco vazio). Para reimportar
-depois de mudar o JSON: `docker compose down -v && docker compose up -d`.
+## Estrutura
 
-## Realm `avisai`
+```text
+master   só administração (temas RODAR no login e no console)
+rodar    realm do produto
+├── clients        rodar-mobile · rodar-web · rodar-api
+├── organizations  rota-sul · translog-demo           (realm/organizations.conf)
+├── papéis         driver · cco-operator · cco-admin
+└── tema           rodar
+```
 
-| Cliente | Tipo | Uso |
+| Client | Tipo | Uso |
 |---|---|---|
-| `avisai-mobile` | público, Authorization Code + PKCE (S256), sem password grant | app do motorista. Redirects `avisai://*` (dev client) e `exp://*` (Expo Go) |
-| `avisai-api` | só audience | o access token do app sai com `aud: avisai-api` para o backend validar |
+| `rodar-mobile` | público, Authorization Code + PKCE (S256), sem password grant | app do motorista. Redirects `avisai://*` (scheme atual do app), `rodar://*` e `exp://*` (Expo Go) |
+| `rodar-web` | público, Authorization Code + PKCE (S256) | painel do CCO (`http://localhost:5173` no Vite) |
+| `rodar-api` | só audiência | o access token sai com `aud: rodar-api` para o backend validar |
 
-Claims extras no ID/access token: `driver_id` (número), `trip_id`, `plate`, `company`, `roles` (`driver` | `cco`).
+**Token:** identidade (`sub`, `name`, `email`), `roles` e `organization` (aliases das empresas da pessoa). Os apps
+pedem o escopo `organization:*`. Nada de viagem, motorista ou veículo no token: isso fica no backend.
 
-Usuários de teste (senha local `avisai-demo`, só ambiente de desenvolvimento):
+**Login em duas etapas:** com Organizations ligado, o Keycloak pede o e-mail e depois a senha. Com `login_hint`
+(o app manda o e-mail do perfil escolhido) ele vai direto para a senha.
 
-| Usuário | Papel | driver_id / trip_id |
+### Onde cada coisa é configurada
+
+| O quê | Arquivo | Quando é aplicado |
 |---|---|---|
-| carlos@rotasul.test | driver | 1 |
-| marina@rotasul.test | driver | 2 |
-| joao@rotasul.test | driver | 3 |
-| cco@rotasul.test | cco | – |
+| Realm `rodar` (clients, papéis, usuários de teste, tema) | `realm/rodar-realm.json` | só na **primeira** subida (banco vazio) |
+| Empresas e membros | `realm/organizations.conf` | a cada `docker compose up` (`scripts/configure.sh`, cria o que falta) |
+| Temas do realm `master` | `scripts/configure.sh` | a cada `docker compose up` |
 
-Os e-mails batem com os perfis de demo do app (`avisai-mobile`, `src/features/auth/api/profiles.ts`).
+Mudou o `rodar-realm.json`? Recrie o banco local: `docker compose down -v && docker compose up -d`.
+
+**Cadastrar uma transportadora:** acrescente uma linha em `realm/organizations.conf` e rode
+`docker compose up -d kc-setup`.
+
+### Usuários de teste
+
+Senha local `avisai-demo` para todos (só desenvolvimento, dados fictícios).
+
+| Usuário | Papéis | Empresas |
+|---|---|---|
+| carlos@rotasul.test | driver | rota-sul |
+| marina@rotasul.test | driver | rota-sul |
+| joao@rotasul.test | driver | rota-sul, translog-demo (agregado) |
+| cco@rotasul.test | cco-operator | rota-sul |
+| gestor@rotasul.test | cco-operator, cco-admin | rota-sul |
+| ana@translog.test | driver | translog-demo |
+
+Os motoristas batem com os perfis de demo do rodar-mobile (`src/features/auth/api/profiles.ts`).
 
 ## Tema de login `rodar`
 
@@ -58,11 +90,14 @@ desligado: editar o CSS e recarregar a página basta.
   (`resources/css/rodar-admin.css`, só variáveis e poucos seletores do PatternFly 5). O layout das telas é o do Keycloak.
 - `resources/img/rodar-logo.svg` é o símbolo + "RODAR" com a palavra em contorno (Kumbh Sans 750), porque SVG em `<img>` não usa as fontes da página.
 
-O realm `master` não vem do JSON: o serviço `kc-setup` do compose roda `scripts/configure-master.sh` depois que o
+O realm `master` não vem do JSON: o serviço `kc-setup` do compose roda `scripts/configure.sh` depois que o
 Keycloak fica pronto e aplica os temas (idempotente). Ao atualizar a versão do Keycloak, confira o console: o CSS
 depende das classes do PatternFly e pode precisar de ajuste.
 
 ## Ainda não feito
 
 - Produção: `start` com HTTPS, hostname fixo, admin permanente no lugar do admin temporário do bootstrap, segredos fora do `.env`.
-- Backend validando o JWT (JWKS em `/realms/avisai/protocol/openid-connect/certs`, `aud=avisai-api`).
+- Backend validando o JWT (JWKS em `/realms/rodar/protocol/openid-connect/certs`, `iss` do realm, `aud=rodar-api`) e filtrando pela `organization`.
+- Painel web (`rodar-web`) entrando pelo client `rodar-web`.
+- Login do motorista por celular + código (o mockup prevê SMS; ver pendências da ADR).
+- Configuração como código para staging/prod (`keycloak-config-cli` ou Terraform).

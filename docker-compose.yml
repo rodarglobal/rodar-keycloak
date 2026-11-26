@@ -47,15 +47,16 @@ services:
       postgres:
         condition: service_healthy
 
-  # Aplica os temas RODAR no realm master (login e console de administração) e sai.
+  # Aplica temas no master e as Organizations (empresas) do realm rodar, e sai. Ver scripts/configure.sh.
   kc-setup:
     image: quay.io/keycloak/keycloak:${KC_VERSION:-26.4}
-    entrypoint: ["/bin/bash", "/scripts/configure-master.sh"]
+    entrypoint: ["/bin/bash", "/scripts/configure.sh"]
     environment:
       KC_ADMIN_USER: ${KC_ADMIN_USER:-admin}
       KC_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:-admin}
     volumes:
-      - ./scripts/configure-master.sh:/scripts/configure-master.sh:ro
+      - ./scripts/configure.sh:/scripts/configure.sh:ro
+      - ./realm/organizations.conf:/config/organizations.conf:ro
     depends_on:
       keycloak:
         condition: service_healthy
